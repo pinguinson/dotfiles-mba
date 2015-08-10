@@ -1,21 +1,19 @@
 #!/bin/bash
 
-# xinitrc
-cp .xinitrc ~/
-
-# Xresources
-cp .Xresources ~/
+# xorg
+cp xorg/* ~/
 
 # zsh
-cp .zshrc ~/
-cp .zreztorc ~/
+cp zsh/* ~/
 
-# make .config folder
+# make .config folders
 mkdir ~/.config
+mkdir ~/.config/bspwm
+mkdir ~/.config/sxhkd
 
 # copy bspwm and sxhkd configs
-cp -r .config/bspwm ~/.config
-cp -r .config/sxhkd ~/.config
+cp -rf config/bspwmrc ~/.config/bspwm/bspwmrc
+cp -rf config/sxhkdrc ~/.config/sxhkd/sxhkdrc
 
 # create bin folder and notify to add it to $PATH
 mkdir ~/bin
