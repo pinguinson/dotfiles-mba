@@ -2,10 +2,9 @@
 
 PANEL_FIFO=/tmp/panel-fifo
 PANEL_HEIGHT=25
-PANEL_FONT_FAMILY="Monaco:size=9"
-ICON_FONT="FontAwesome:size=11"
+PANEL_FONT_FAMILY="Ubuntu:size=10"
 
-if [ $(pgrep -cx panel) -gt 1 ]; then
+if [[ $(pgrep -cx panel) -gt 1 ]]; then
 	printf "%s\n" "The panel is already running." >&2
 	exit 1
 fi
@@ -18,67 +17,43 @@ mkfifo "$PANEL_FIFO"
 bspc config top_padding $PANEL_HEIGHT
 bspc control --subscribe > "$PANEL_FIFO" &
 
-# clock
-while true; do
-	echo 'C\uf017' $(date +"%H:%M")
-	sleep 5
-done > "$PANEL_FIFO" &
-
-# date
-while true; do 
-	echo 'D\uf073' $(date +'%a'), $(date +'%b %e')
-	sleep 100
-done > $PANEL_FIFO &
-
-# alsa volume
-while true; do
-	ALSA_VOLUME=$(amixer get Master | grep 'Mono:' | grep -o '...%' | sed 's/\[//' | sed 's/%//' | sed 's/ //')
-	ALSA_STATE=$(amixer get Master | grep 'Mono:' | grep -o '\[on]')
-	if [ $ALSA_STATE ]; then
-		if [ $ALSA_VOLUME -ge 70 ]; then
-			echo V'\uf028' $ALSA_VOLUME%
-		elif [ $ALSA_VOLUME -gt 0 -a $ALSA_VOLUME -lt 70 ]; then
-			echo V'\uf027' $ALSA_VOLUME%
-		elif [ $ALSA_VOLUME -eq 0 ]; then
-			echo V'\uf026' $ALSA_VOLUME%
-		fi
-	else
-		echo V'\uf026' $ALSA_VOLUME%
-	fi
-	sleep 1
-done > $PANEL_FIFO &
-
-# wifi
-while true; do
-	SSID=$(sudo iw dev wlp1s0b1 link | grep SSID | sed 's/.*://' | sed 's/ //')
-	CONNECTION_STATE=$(sudo iw dev wlp1s0b1 link | grep SSID)
-	if [ $CONNECTION_STATE ]; then
-		echo N'\uf1eb' $SSID
-	else
-		echo N'\uf1eb' Disconnected
-	fi
+# time
+while [[ true ]]; do
+	echo D$(date +%A | sed 's/\(.*\)/\U\1/') $(date +"%d"), $(date +"%H:%M")
 	sleep 5
 done > $PANEL_FIFO &
 
 # battery
-while true; do
-	BATTERY_LEVEL=$(acpi --battery | awk -F " " '{print $4}' | sed 's/%//' | sed 's/,//')
-	if [ $BATTERY_LEVEL -ge 95 ]; then
-		echo B'\uf240' $BATTERY_LEVEL%
-	elif [ $BATTERY_LEVEL -ge 70 -a $BATTERY_LEVEL -lt 95 ]; then
-		echo B'\uf241' $BATTERY_LEVEL%
-	elif [ $BATTERY_LEVEL -ge 40 -a $BATTERY_LEVEL -lt 70 ]; then
-		echo B'\uf242' $BATTERY_LEVEL%
-	elif [ $BATTERY_LEVEL -ge 20 -a $BATTERY_LEVEL -lt 40 ]; then
-		echo B'\uf243' $BATTERY_LEVEL%
-	elif [ $BATTERY_LEVEL -ge 0 -a $BATTERY_LEVEL -lt 20 ]; then
-		echo B'\uf244' $BATTERY_LEVEL%
+while [[ true ]]; do
+	echo B$(acpi -i | sed -n 1p | egrep -o "[0-9]+%")
+	sleep 30
+done > $PANEL_FIFO &
+
+#volume
+while [[ true ]]; do
+	OFF=$(amixer get Master | sed -n 5p | grep off)
+	if [[ -z $OFF ]]; then
+		echo V+$(amixer get Master | egrep -o "[0-9]+%")
+	else
+		echo V-$(amixer get Master | egrep -o "[0-9]+%")
 	fi
-	sleep 20
+	sleep 0.1
+done > $PANEL_FIFO &
+
+# wifi
+while [[ true ]]; do
+	SSID=$(iw dev wlp1s0b1 link | grep SSID | sed 's/.*://' | sed 's/ //' | sed 's/\(.*\)/\U\1/')
+	CONNECTION_STATE=$(iw dev wlp1s0b1 link | grep SSID)
+	if [ $CONNECTION_STATE ]; then
+		echo N+$SSID
+	else
+		echo N-DISCONNECTED
+	fi
+	sleep 1
 done > $PANEL_FIFO &
 
 . panel_colors
 
-cat "$PANEL_FIFO" | panel_bar | lemonbar -g x$PANEL_HEIGHT -f "$PANEL_FONT_FAMILY" -f "$ICON_FONT" -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" -u 2 | zsh &
+cat "$PANEL_FIFO" | panel_bar | lemonbar -g x$PANEL_HEIGHT -f "$PANEL_FONT_FAMILY" -F "$COLOR_ON" -B "$COLOR_BACKGROUND" -u 2 | zsh &
 
 wait
