@@ -12,7 +12,7 @@ cp zsh/.zpreztorc ~/.zpreztorc
 mkdir ~/.config
 
 # copy bspwm and sxhkd configs
-cp -rf config/ ~/.config/
+cp -rf .config ~/.config/
 
 # create bin folder and notify to add it to $PATH
 
