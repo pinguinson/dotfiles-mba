@@ -9,8 +9,7 @@ bspc config borderless_monocle  	true
 bspc config gapless_monocle     	true
 bspc config focus_by_distance   	true
 
-# tabs' icons:	terminal		 sublime		  chrome		   pavucontrol+ts3	steam			 file-manager	   torrents			media
-bspc monitor -d $(echo '\uf120') $(echo '\uf121') $(echo '\uf268') $(echo '\uf028') $(echo '\uf1b6') $(echo '\uf07c')  $(echo '\uf019') $(echo '\uf001')
+bspc monitor -d TERMINAL CODE WEB FILES TORRENTS MEDIA
 
 bspc rule -a subl3 						desktop=^2
 bspc rule -a Google-chrome-stable 		desktop=^3
