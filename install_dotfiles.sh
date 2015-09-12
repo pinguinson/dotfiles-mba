@@ -7,6 +7,7 @@ cp xorg/.Xresources ~/.Xresources
 # zsh
 cp zsh/.zshrc ~/.zshrc
 cp zsh/.zpreztorc ~/.zpreztorc
+cp zsh/.zprofile ~/.zprofile
 
 # make .config folders
 mkdir ~/.config
