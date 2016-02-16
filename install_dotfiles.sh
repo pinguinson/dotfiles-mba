@@ -13,7 +13,7 @@ cp zsh/.zprofile ~/.zprofile
 mkdir ~/.config
 
 # copy bspwm and sxhkd configs
-cp -rf .config ~/.config/
+cp -rf .config ~/
 
 # create bin folder and notify to add it to $PATH
 
